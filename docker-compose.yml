@@ -1,0 +1,72 @@
+version: '3.9'
+
+services:
+  # ========================================
+  # Production Service
+  # ========================================
+  journal-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: journal-assistant-bot
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - journal-network
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # ========================================
+  # Development Service
+  # ========================================
+  journal-assistant-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: journal-assistant-dev
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - HOST=0.0.0.0
+    env_file:
+      - .env
+    volumes:
+      # Монтирование исходного кода для hot-reload
+      - .:/app
+      # Исключение node_modules из монтирования
+      - /app/node_modules
+      - ./logs:/app/logs
+    networks:
+      - journal-network
+    command: npm run start:dev
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '5m'
+        max-file: '2'
+
+networks:
+  journal-network:
+    driver: bridge
+    name: journal-assistant-network
