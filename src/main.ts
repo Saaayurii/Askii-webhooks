@@ -33,6 +33,8 @@ async function bootstrap() {
     .setVersion('1.0.0')
     .addTag('webhook', 'Webhook endpoints для приема событий от СпросиИИ')
     .addTag('health', 'Проверка состояния сервиса')
+    .addTag('ai', 'Endpoints для работы с AI (LLM)')
+    .addTag('askii-api', 'Endpoints для отправки сообщений в API СпросиИИ')
     .addBearerAuth(
       {
         type: 'http',

@@ -4,6 +4,7 @@ import { WebhookPayloadDto } from './dto/webhook-payload.dto';
 import { WebhookResponseDto } from './dto/webhook-response.dto';
 import { AiService } from '../ai/ai.service';
 import { AiRequestDto } from '../ai/dto/ai-request.dto';
+import { AskiiApiService } from '../askii-api/askii-api.service';
 
 /**
  * Сервис для обработки webhook'ов от СпросиИИ
@@ -15,6 +16,7 @@ export class WebhookService {
   constructor(
     private readonly configService: ConfigService,
     private readonly aiService: AiService,
+    private readonly askiiApiService: AskiiApiService,
   ) {}
 
   /**
@@ -114,8 +116,36 @@ export class WebhookService {
         `AI ответ сгенерирован: ${aiResponse.response.substring(0, 100)}...`,
       );
 
-      // TODO: Отправить ответ обратно через API СпросиИИ
-      // Это будет реализовано в следующей итерации
+      // Извлекаем conversationId и contactId из payload
+      const conversationId =
+        payload.data.conversationId || payload.data.conversation_id;
+      const contactId = payload.data.contactId || payload.data.contact_id;
+
+      if (!conversationId || !contactId) {
+        this.logger.warn(
+          'conversationId или contactId не найдены в payload, пропускаем отправку',
+        );
+        return;
+      }
+
+      // Отправляем ответ обратно через API СпросиИИ
+      try {
+        const sendResult = await this.askiiApiService.sendSimpleMessage(
+          conversationId,
+          contactId,
+          aiResponse.response,
+        );
+
+        this.logger.log(
+          `Ответ успешно отправлен в conversation ${conversationId}, messageId: ${sendResult.messageId}`,
+        );
+      } catch (sendError) {
+        this.logger.error(
+          `Ошибка при отправке ответа через API: ${sendError.message}`,
+          sendError.stack,
+        );
+        // Не пробрасываем ошибку дальше, чтобы webhook считался обработанным
+      }
     } catch (error) {
       this.logger.error(
         `Ошибка при обработке сообщения: ${error.message}`,
