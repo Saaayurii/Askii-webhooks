@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WebhookService } from './webhook.service';
 import { WebhookPayloadDto } from './dto/webhook-payload.dto';
 import { ConfigService } from '@nestjs/config';
+import { AiService } from '../ai/ai.service';
 
 describe('WebhookService', () => {
   let service: WebhookService;
   let configService: ConfigService;
+  let aiService: AiService;
 
   const mockConfigService = {
     get: jest.fn((key: string) => {
@@ -17,6 +19,17 @@ describe('WebhookService', () => {
     }),
   };
 
+  const mockAiService = {
+    generateResponse: jest.fn().mockResolvedValue({
+      response: 'Тестовый ответ от AI',
+      model: 'qwen2.5:3b',
+      promptTokens: 100,
+      completionTokens: 200,
+      totalTokens: 300,
+      timestamp: new Date().toISOString(),
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -25,11 +38,16 @@ describe('WebhookService', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
+        {
+          provide: AiService,
+          useValue: mockAiService,
+        },
       ],
     }).compile();
 
     service = module.get<WebhookService>(WebhookService);
     configService = module.get<ConfigService>(ConfigService);
+    aiService = module.get<AiService>(AiService);
   });
 
   afterEach(() => {
