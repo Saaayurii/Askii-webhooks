@@ -109,8 +109,11 @@ export class AiService {
   private buildMessages(
     userMessage: string,
     conversationHistory?: ChatMessageDto[],
-  ): Array<{ role: string; content: string }> {
-    const messages: Array<{ role: string; content: string }> = [];
+  ): Array<{ role: 'system' | 'user' | 'assistant'; content: string }> {
+    const messages: Array<{
+      role: 'system' | 'user' | 'assistant';
+      content: string;
+    }> = [];
 
     // Добавляем системный промпт
     messages.push({
