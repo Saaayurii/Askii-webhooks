@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { AiModule } from './ai/ai.module';
+import { AskiiApiModule } from './askii-api/askii-api.module';
 
 /**
  * Корневой модуль приложения
@@ -21,6 +22,8 @@ import { AiModule } from './ai/ai.module';
     HealthModule,
     // Модуль для работы с AI (LLM)
     AiModule,
+    // Модуль для работы с API СпросиИИ
+    AskiiApiModule,
     // Модуль для обработки webhook'ов
     WebhookModule,
   ],
