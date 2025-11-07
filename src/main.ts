@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,12 +14,23 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Глобальные фильтры для обработки ошибок
+  app.useGlobalFilters(
+    new AllExceptionsFilter(), // Обрабатывает все исключения
+    new HttpExceptionFilter(), // Обрабатывает HTTP исключения
+  );
+
   // Глобальная валидация данных
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Удаляет свойства, не описанные в DTO
       transform: true, // Автоматически преобразует типы
       forbidNonWhitelisted: true, // Выбрасывает ошибку при неизвестных свойствах
+      disableErrorMessages: false, // Показывать детальные ошибки валидации
+      validationError: {
+        target: false, // Не включать объект target в ошибку
+        value: false, // Не включать значение в ошибку (безопасность)
+      },
       transformOptions: {
         enableImplicitConversion: true,
       },
