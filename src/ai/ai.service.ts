@@ -20,10 +20,10 @@ export class AiService {
   constructor(private readonly configService: ConfigService) {
     // Инициализация OpenAI клиента для работы с Ollama
     const apiUrl = this.configService.get<string>(
-      'ASKII_API_URL',
-      'http://localhost:11434',
+      'OLLAMA_API_URL',
+      'http://172.16.0.14:11434',
     );
-    const apiKey = this.configService.get<string>('ASKII_API_KEY', 'ollama');
+    const apiKey = this.configService.get<string>('OLLAMA_API_KEY', 'ollama');
 
     this.openai = new OpenAI({
       baseURL: `${apiUrl}/v1`,
