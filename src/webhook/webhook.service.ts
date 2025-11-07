@@ -2,6 +2,8 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WebhookPayloadDto } from './dto/webhook-payload.dto';
 import { WebhookResponseDto } from './dto/webhook-response.dto';
+import { AiService } from '../ai/ai.service';
+import { AiRequestDto } from '../ai/dto/ai-request.dto';
 
 /**
  * Сервис для обработки webhook'ов от СпросиИИ
@@ -10,7 +12,10 @@ import { WebhookResponseDto } from './dto/webhook-response.dto';
 export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly aiService: AiService,
+  ) {}
 
   /**
    * Обрабатывает входящий webhook от СпросиИИ
@@ -83,7 +88,40 @@ export class WebhookService {
     payload: WebhookPayloadDto,
   ): Promise<void> {
     this.logger.log(`Обработка сообщения: ${JSON.stringify(payload.data)}`);
-    // TODO: Интеграция с AI модулем для генерации ответа
+
+    try {
+      // Извлекаем сообщение пользователя из payload
+      const userMessage =
+        payload.data.message || payload.data.content || payload.data.text;
+      const userId = payload.data.userId || payload.data.user_id || 'unknown';
+
+      if (!userMessage) {
+        this.logger.warn('Сообщение пользователя не найдено в payload');
+        return;
+      }
+
+      // Формируем запрос к AI
+      const aiRequest: AiRequestDto = {
+        userMessage: userMessage,
+        userId: userId,
+        conversationHistory: payload.data.conversationHistory || [],
+      };
+
+      // Генерируем ответ через AI
+      const aiResponse = await this.aiService.generateResponse(aiRequest);
+
+      this.logger.log(
+        `AI ответ сгенерирован: ${aiResponse.response.substring(0, 100)}...`,
+      );
+
+      // TODO: Отправить ответ обратно через API СпросиИИ
+      // Это будет реализовано в следующей итерации
+    } catch (error) {
+      this.logger.error(
+        `Ошибка при обработке сообщения: ${error.message}`,
+        error.stack,
+      );
+    }
   }
 
   /**

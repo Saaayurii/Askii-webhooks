@@ -275,14 +275,33 @@ docker logs -f journal-assistant
 - ✅ CORS настройки
 - ✅ Секретные данные в .env (не в репозитории)
 
+## ✅ Реализовано
+
+### v0.2.0 - AI Integration (Current)
+- ✅ **AI Module** с интеграцией LLM (Ollama/OpenAI-compatible API)
+- ✅ **Системный промпт** для ассистента научного журнала
+- ✅ **AI Service** с обработкой запросов и генерацией ответов
+- ✅ **DTOs** для AI запросов и ответов с валидацией
+- ✅ **Интеграция** Webhook → AI → Response
+- ✅ **Конфигурация** для LLM (модель, temperature, max tokens)
+- ✅ **Unit тесты** (23 passed, 80% coverage для webhook)
+
+### v0.1.0 - Base Modules
+- ✅ Health Check module с Swagger
+- ✅ Webhook module для приема событий
+- ✅ ConfigModule для переменных окружения
+- ✅ Docker setup (Dockerfile, docker-compose.yml)
+- ✅ Git Flow workflow
+- ✅ TDD approach with Jest
+
 ## 📈 План развития
 
-- [ ] Реализация базового webhook endpoint'а
-- [ ] Интеграция с СпросиИИ API
-- [ ] Контекстная обработка для научного журнала
+- [ ] Отправка ответов обратно через API СпросиИИ
+- [ ] Контекстная память разговора (Redis/PostgreSQL)
 - [ ] Rate limiting и кеширование
 - [ ] Логирование (Winston)
 - [ ] Мониторинг (Prometheus + Grafana)
+- [ ] E2E тесты с реальным LLM
 - [ ] CI/CD pipeline
 - [ ] Kubernetes deployment
 
